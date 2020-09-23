@@ -41,27 +41,22 @@ def cycle(data, db): # cycles through each new bit of data and sends to db if ne
         if item != None:
 
             date = re.compile(r"\d+/\d+/\d\d").search(item)
-            tests = re.compile(r"Tests [\d,]+[.0+]?.").search(item)
-            # print(date)
-            # print(tests)
+            tests = re.compile(r"Tests ([\d,]+[.0+]?.)").search(item)
             if date and tests:
                 date = date.group()
-                print(date)
-                tests=tests.group()
+                
+                tests=''.join([x for x in tests.group() if x in "0123456789.,"])
+
+                print(tests)
                 if data.index(item) < 8:
-                    print("case 1")
                     add_to_db("Student Negative", date, tests, db)
                 if data.index(item) > 8 and data.index(item) < 15:
-                    print("case 2")
                     add_to_db("Student Positive", date, tests, db)
                 if data.index(item) > 15 and data.index(item) < 23:
-                    print("case 3")
                     add_to_db("Faculty Negative", date, tests, db)
                 if data.index(item) > 22 and data.index(item) < 30:
-                    print("case 4")
                     add_to_db("Faculty Positive", date, tests, db)
                 if data.index(item) > 30 and "New Positive Tests" in item:
-                    print("case 5")
                     add_to_db("New Positive Overall", date, tests, db)
 
 
