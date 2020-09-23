@@ -19,7 +19,6 @@ def run_webdriver(url): # scrapes url and returns covid data
     
     time.sleep(10)
     kiddos = driver.find_elements_by_tag_name('rect')
-    print(kiddos)
     kiddos = [kid.get_attribute('aria-label') for kid in kiddos]
     for kid in kiddos:
         print(kid)
@@ -28,33 +27,46 @@ def run_webdriver(url): # scrapes url and returns covid data
 
 
 
-def add_to_db(type, date, tests, db):  # add a column of data to the db
+def add_to_db(format, date, tests, db):  # add a column of data to the db
     Search = Query()
-    if (db.search(Search.date==date and Search.type == type) == 0):
-        db.insert({'date': date, 'type': type, 'tests': tests})
+    if db.search((Search['date']==date) & (Search['type'] == format)) == []:
+        db.insert({'date': date, 'type': format, 'tests': tests})
 
 def connect_to_db(): # initialize connection to tinydb
     db = TinyDB('db.json')
     return db
 
-def cycle(data, db):
+def cycle(data, db): # cycles through each new bit of data and sends to db if new
     for item in data:
-        date = re.match(r'\d+/\d+/\d\d', item)
-        tests = re.match(r'[\d,]+.00.', item)
-        if data.index(item) < 8 and item != None:
-            add_to_db("Student Negative", date, tests, db)
-        if data.index(item) > 8 and data.index(item) < 15 and item != None:
-            add_to_db("Student Positive", date, tests, db)
-        if data.index(item) > 15 and data.index(item) < 23 and item != None:
-            add_to_db("Faculty Negative", date, tests, db)
-        if data.index(item) > 22 and data.index(item) < 30 and item != None:
-            add_to_db("Faculty Positive", date, tests, db)
-        if data.index(item) > 30 and "New Positive Tests" in item:
-            add_to_db("New Positive Overall", date, tests, db)
+        if item != None:
+
+            date = re.compile(r"\d+/\d+/\d\d").search(item)
+            tests = re.compile(r"Tests [\d,]+[.0+]?.").search(item)
+            # print(date)
+            # print(tests)
+            if date and tests:
+                date = date.group()
+                print(date)
+                tests=tests.group()
+                if data.index(item) < 8:
+                    print("case 1")
+                    add_to_db("Student Negative", date, tests, db)
+                if data.index(item) > 8 and data.index(item) < 15:
+                    print("case 2")
+                    add_to_db("Student Positive", date, tests, db)
+                if data.index(item) > 15 and data.index(item) < 23:
+                    print("case 3")
+                    add_to_db("Faculty Negative", date, tests, db)
+                if data.index(item) > 22 and data.index(item) < 30:
+                    print("case 4")
+                    add_to_db("Faculty Positive", date, tests, db)
+                if data.index(item) > 30 and "New Positive Tests" in item:
+                    print("case 5")
+                    add_to_db("New Positive Overall", date, tests, db)
 
 
 if __name__ == "__main__":
     data = run_webdriver("https://app.powerbi.com/view?r=eyJrIjoiMzI4OTBlMzgtODg5MC00OGEwLThlMDItNGJiNDdjMDU5ODhkIiwidCI6ImQ1N2QzMmNjLWMxMjEtNDg4Zi1iMDdiLWRmZTcwNTY4MGM3MSIsImMiOjN9")
     db = connect_to_db()
     cycle(data, db)
-    db.all()
+    print(db.all())
