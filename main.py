@@ -7,21 +7,8 @@ from lxml import html
 import requests
 import urllib3
 import os 
+import time
 
-def parentcycle(parent):
-    children = parent.find_elements_by_xpath('.//*')
-    for child in children:
-        
-        try:
-            label = child.get_attribute('aria-label') # seek out elements with this label, they have info we care about!
-            if not(label == None) and label[0:14]=="ResultLoadDate":
-                print(label)
-                print(child)
-                inputvar = input(" ")
-        except Exception as e:
-            print("no <3")
-            print(e)
-        parentcycle(child)
 
 def run_webdriver(url):
     options = webdriver.ChromeOptions() 
@@ -30,9 +17,16 @@ def run_webdriver(url):
     driver = webdriver.Chrome(options=options, executable_path=filename)
     driver.get(url)
     # WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.innerContainer")))
-    parent = driver.find_element_by_xpath('//*[@id="reportLandingContainer"]/div/exploration-container')
-    parentcycle(parent)
-    driver.quit()
+    # parent = driver.find_element_by_xpath('//*[@id="reportLandingContainer"]/div/exploration-container')
+    time.sleep(10)
+    kiddos = driver.find_elements_by_tag_name('rect')
+    print(kiddos)
+    kiddos = [kid.get_attribute('aria-label') for kid in kiddos]
+    for kid in kiddos:
+        print(kid)
+    return kiddos
+
+
 
 
 def add_to_db():  # add a column of data to the db
