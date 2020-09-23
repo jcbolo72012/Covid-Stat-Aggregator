@@ -13,7 +13,7 @@ def parentcycle(parent):
     for child in children:
         
         try:
-            label = child.get_attribute('aria-label')
+            label = child.get_attribute('aria-label') # seek out elements with this label, they have info we care about!
             if not(label == None) and label[0:14]=="ResultLoadDate":
                 print(label)
                 print(child)
